@@ -26,6 +26,7 @@ jobs:
       - name: Run Go script
         env:
           GODEBUG: "x509ignoreCN=0"
+          CGO_ENABLED: 0 # 禁用 CGO，避免 -pie
         run: go run main.go
 
       - name: Commit and push changes
