@@ -1,3 +1,10 @@
+name: Update USDT Swap Data
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # UTC 时间每天 0 点触发
+  workflow_dispatch: # 手动触发
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -18,3 +25,11 @@ jobs:
 
       - name: Run Go script
         run: go run main.go
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.name "A1rChina"
+          git config --global user.email "xss.art1st@gmail.com"
+          git add README.md
+          git commit -m "Update USDT Swap Data"
+          git push
