@@ -23,6 +23,16 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y --reinstall ca-certificates
 
+      - name: Print Go CA certificates
+        run: |
+          go env GOROOT
+          go env GOPATH
+          ls -l $(go env GOROOT)/lib/net/http/transport.go
+
+      - name: Test network connection
+        run: |
+          curl -v https://www.okx.com/api/v5/market/tickers?instType=SWAP
+
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
@@ -30,7 +40,7 @@ jobs:
 
       - name: Run Go script
         env:
-          GODEBUG: "x509ignoreCN=0"
+          GODEBUG: "x509verify=1"
           CGO_ENABLED: 0 # 禁用 CGO，避免 -pie
         run: go run main.go
 
