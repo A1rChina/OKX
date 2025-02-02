@@ -7,13 +7,14 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 )
 
 // Ticker represents the structure of a single ticker from OKX API
 type Ticker struct {
-	InstID     string  `json:"instId"`
-	Last       string  `json:"last"`
-	VolCcy24h  string  `json:"volCcy24h"`
+	InstID    string `json:"instId"`
+	Last      string `json:"last"`
+	VolCcy24h string `json:"volCcy24h"`
 }
 
 // APIResponse represents the structure of the API response
@@ -24,6 +25,17 @@ type APIResponse struct {
 const (
 	OKXAPIURL = "https://www.okx.com/api/v5/market/tickers?instType=SWAP"
 )
+
+func transformInstID(instID string) string {
+	// 假设传入的格式为 "BTC-USD-SWAP"
+	parts := strings.Split(instID, "-")
+	if len(parts) >= 2 {
+		// 拼接前两个部分，并在末尾添加 "T"
+		return parts[0] + parts[1] + "T"
+	}
+	// 如果格式不符合预期，则直接返回原始值
+	return instID
+}
 
 func main() {
 	// Fetch data from OKX API
@@ -61,8 +73,10 @@ func main() {
 		}
 		dailyVolume := last * volCcy24h
 		if dailyVolume >= 30000000 {
+			// 将 Instrument ID 转换成期望的格式，例如 "BTC-USD-SWAP" -> "BTCUSDT"
+			transformedID := transformInstID(ticker.InstID)
 			filteredTickers = append(filteredTickers, []string{
-				ticker.InstID, fmt.Sprintf("%.2f", last), fmt.Sprintf("%.2f", dailyVolume),
+				transformedID, fmt.Sprintf("%.2f", last), fmt.Sprintf("%.2f", dailyVolume),
 			})
 		}
 	}
