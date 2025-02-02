@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -20,6 +21,13 @@ type Ticker struct {
 // APIResponse represents the structure of the API response.
 type APIResponse struct {
 	Data []Ticker `json:"data"`
+}
+
+// TickerRow 用于存储筛选后的数据，方便后续排序
+type TickerRow struct {
+	InstID      string
+	LastPrice   float64
+	DailyVolume float64
 }
 
 const (
@@ -59,15 +67,15 @@ func main() {
 		os.Exit(1)
 	}
 
-	// 筛选 USDT 交易对，并计算 24h 交易额（单位 USDT），只保留日交易额大于等于 3000 万的交易对
-	filteredTickers := [][]string{{"Instrument ID", "Last Price (USDT)", "24h Volume (USDT)"}}
+	// 筛选 USDT 交易对，并计算 24h 交易额（单位 USDT），只保留日交易额大于等于 3000 万 USDT 的数据
+	var rows []TickerRow
 	for _, ticker := range apiResponse.Data {
 		// 只处理 USDT 交易对（Instrument ID 中必须包含 "USDT"）
 		if !strings.Contains(ticker.InstID, "USDT") {
 			continue
 		}
 
-		// 转换数字字符串为浮点数
+		// 转换字符串为浮点数
 		last, err := strconv.ParseFloat(ticker.Last, 64)
 		if err != nil {
 			continue
@@ -81,20 +89,25 @@ func main() {
 		// 只保留日交易额大于等于 3000 万 USDT 的数据
 		if dailyVolume >= 30000000 {
 			transformedID := transformInstID(ticker.InstID)
-			filteredTickers = append(filteredTickers, []string{
-				transformedID,
-				fmt.Sprintf("%.2f", last),
-				fmt.Sprintf("%.2f", dailyVolume),
+			rows = append(rows, TickerRow{
+				InstID:      transformedID,
+				LastPrice:   last,
+				DailyVolume: dailyVolume,
 			})
 		}
 	}
+
+	// 按照日交易额从大到小排序
+	sort.Slice(rows, func(i, j int) bool {
+		return rows[i].DailyVolume > rows[j].DailyVolume
+	})
 
 	// 生成 Markdown 格式的表格文档
 	output := "# USDT Perpetual Contracts with Daily Volume > $30 Million\n\n"
 	output += "| Instrument ID | Last Price (USDT) | 24h Volume (USDT) |\n"
 	output += "|---------------|-------------------|-------------------|\n"
-	for _, row := range filteredTickers[1:] {
-		output += fmt.Sprintf("| %s | %s | %s |\n", row[0], row[1], row[2])
+	for _, row := range rows {
+		output += fmt.Sprintf("| %s | %.2f | %.2f |\n", row.InstID, row.LastPrice, row.DailyVolume)
 	}
 
 	// 写入 README.md 文件
