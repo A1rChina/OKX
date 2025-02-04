@@ -11,28 +11,26 @@ import (
 	"strings"
 )
 
-// Ticker represents the structure of a single ticker from OKX API.
+// Ticker 表示 OKX API 返回的单个 ticker 数据结构
 type Ticker struct {
 	InstID    string `json:"instId"`
 	Last      string `json:"last"`
 	VolCcy24h string `json:"volCcy24h"`
 }
 
-// APIResponse represents the structure of the API response.
+// APIResponse 表示 API 返回的数据结构
 type APIResponse struct {
 	Data []Ticker `json:"data"`
 }
 
-// TickerRow 用于存储筛选后的数据，方便后续排序
+// TickerRow 用于存储筛选后的数据，方便后续排序和展示
 type TickerRow struct {
 	InstID      string
 	LastPrice   float64
 	DailyVolume float64
 }
 
-const (
-	OKXAPIURL = "https://www.okx.com/api/v5/market/tickers?instType=SWAP"
-)
+const OKXAPIURL = "https://www.okx.com/api/v5/market/tickers?instType=SWAP"
 
 // transformInstID 将 Instrument ID 转换为期望格式：
 // 如 "BTC-USDT-SWAP" 转换为 "BTCUSDT"（保留前两部分，并去掉 "-" 连接符）
@@ -42,6 +40,19 @@ func transformInstID(instID string) string {
 		return parts[0] + parts[1]
 	}
 	return instID
+}
+
+// formatVolume 根据数值大小返回带单位的字符串表示形式。
+// 如果数值大于等于 1e9（十亿），则转换为 B 单位；
+// 如果大于等于 1e6（百万），则转换为 M 单位；
+// 否则直接返回原始数值，均保留 3 位小数。
+func formatVolume(volume float64) string {
+	if volume >= 1e9 {
+		return fmt.Sprintf("%.3fB", volume/1e9)
+	} else if volume >= 1e6 {
+		return fmt.Sprintf("%.3fM", volume/1e6)
+	}
+	return fmt.Sprintf("%.3f", volume)
 }
 
 func main() {
@@ -67,15 +78,16 @@ func main() {
 		os.Exit(1)
 	}
 
-	// 筛选 USDT 交易对，并计算 24h 交易额（单位 USDT），只保留日交易额大于等于 3000 万 USDT 的数据
+	// 筛选 USDT 交易对，并计算 24h 交易额（单位 USDT）
+	// 只保留日交易额大于等于 3000 万 USDT 的数据
 	var rows []TickerRow
 	for _, ticker := range apiResponse.Data {
-		// 只处理 USDT 交易对（Instrument ID 中必须包含 "USDT"）
+		// 只处理 Instrument ID 中包含 "USDT" 的交易对
 		if !strings.Contains(ticker.InstID, "USDT") {
 			continue
 		}
 
-		// 转换字符串为浮点数
+		// 将字符串转换为浮点数
 		last, err := strconv.ParseFloat(ticker.Last, 64)
 		if err != nil {
 			continue
@@ -97,7 +109,7 @@ func main() {
 		}
 	}
 
-	// 按照日交易额从大到小排序
+	// 按照 24h 交易额从大到小排序
 	sort.Slice(rows, func(i, j int) bool {
 		return rows[i].DailyVolume > rows[j].DailyVolume
 	})
@@ -107,7 +119,10 @@ func main() {
 	output += "| Instrument ID | Last Price (USDT) | 24h Volume (USDT) |\n"
 	output += "|---------------|-------------------|-------------------|\n"
 	for _, row := range rows {
-		output += fmt.Sprintf("| %s | %.2f | %.2f |\n", row.InstID, row.LastPrice, row.DailyVolume)
+		// 24h Volume 按照要求保留 3 位小数并带单位
+		volumeStr := formatVolume(row.DailyVolume)
+		// 此处 Last Price 同样保留 3 位小数，如需保留 2 位可将 %.3f 改为 %.2f
+		output += fmt.Sprintf("| %s | %.3f | %s |\n", row.InstID, row.LastPrice, volumeStr)
 	}
 
 	// 写入 README.md 文件
