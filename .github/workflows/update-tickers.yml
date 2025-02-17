@@ -2,7 +2,7 @@ name: Update USDT Swap Data
 
 on:
   schedule:
-    - cron: '0 0 * * *' # UTC 时间每天 0 点触发
+    - cron: '0 */4 * * *' # UTC 时间每4小时触发
   workflow_dispatch: # 手动触发
 
 jobs:
