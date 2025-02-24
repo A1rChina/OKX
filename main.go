@@ -116,13 +116,13 @@ func main() {
 
 	// 生成 Markdown 格式的表格文档
 	output := "# USDT Perpetual Contracts with Daily Volume > $30 Million\n\n"
-	output += "| Instrument ID | Last Price (USDT) | 24h Volume (USDT) |\n"
-	output += "|---------------|-------------------|-------------------|\n"
-	for _, row := range rows {
+	output += "| Rank | Instrument ID | Last Price (USDT) | 24h Volume (USDT) |\n"
+	output += "|------|---------------|-------------------|-------------------|\n"
+	for i, row := range rows {
 		// 24h Volume 按照要求保留 3 位小数并带单位
 		volumeStr := formatVolume(row.DailyVolume)
 		// 此处 Last Price 同样保留 3 位小数，如需保留 2 位可将 %.3f 改为 %.2f
-		output += fmt.Sprintf("| %s | %.3f | %s |\n", row.InstID, row.LastPrice, volumeStr)
+		output += fmt.Sprintf("| %d | %s | %.3f | %s |\n", i+1, row.InstID, row.LastPrice, volumeStr)
 	}
 
 	// 写入 README.md 文件
