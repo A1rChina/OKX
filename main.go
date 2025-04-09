@@ -98,8 +98,8 @@ func main() {
 		}
 		dailyVolume := last * volCcy24h
 
-		// 只保留日交易额大于等于 3000 万 USDT 的数据
-		if dailyVolume >= 30000000 {
+		// 只保留日交易额大于等于 5000 万 USDT 的数据
+		if dailyVolume >= 50000000 {
 			transformedID := transformInstID(ticker.InstID)
 			rows = append(rows, TickerRow{
 				InstID:      transformedID,
@@ -115,7 +115,7 @@ func main() {
 	})
 
 	// 生成 Markdown 格式的表格文档
-	output := "# USDT Perpetual Contracts with Daily Volume > $30 Million\n\n"
+	output := "# USDT Perpetual Contracts with Daily Volume > $50 Million\n\n"
 	output += "| Rank | Instrument ID | Last Price (USDT) | 24h Volume (USDT) |\n"
 	output += "|------|---------------|-------------------|-------------------|\n"
 	for i, row := range rows {
