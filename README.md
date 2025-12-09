@@ -1,32 +1,32 @@
-# USDT Perpetual Contracts with Daily Volume > $50 Million
+# USDT 永续合约成交额排行
 
-| Rank | Instrument ID | Last Price (USDT) | 24h Volume (USDT) |
-|------|---------------|-------------------|-------------------|
-| 1 | ETHUSDT | 3116.310 | 10.278B |
-| 2 | BTCUSDT | 90410.600 | 6.622B |
-| 3 | SOLUSDT | 132.730 | 1.317B |
-| 4 | ZECUSDT | 415.790 | 674.245M |
-| 5 | DOGEUSDT | 0.141 | 438.730M |
-| 6 | LUNAUSDT | 0.145 | 318.344M |
-| 7 | XRPUSDT | 2.057 | 256.703M |
-| 8 | PEPEUSDT | 0.000 | 192.078M |
-| 9 | BEATUSDT | 1.258 | 188.697M |
-| 10 | HYPEUSDT | 28.031 | 148.633M |
-| 11 | SUIUSDT | 1.613 | 137.591M |
-| 12 | STABLEUSDT | 0.016 | 134.129M |
-| 13 | PIPPINUSDT | 0.183 | 117.626M |
-| 14 | PIEVERSEUSDT | 0.638 | 97.264M |
-| 15 | LINKUSDT | 13.808 | 83.097M |
-| 16 | BCHUSDT | 573.800 | 82.981M |
-| 17 | LABUSDT | 0.115 | 82.758M |
-| 18 | ADAUSDT | 0.426 | 78.084M |
-| 19 | XPLUSDT | 0.160 | 78.046M |
-| 20 | BNBUSDT | 886.600 | 74.846M |
-| 21 | PUMPUSDT | 0.003 | 74.475M |
-| 22 | MOODENGUSDT | 0.090 | 67.066M |
-| 23 | WLDUSDT | 0.597 | 61.380M |
-| 24 | AAVEUSDT | 189.140 | 57.783M |
-| 25 | ASTERUSDT | 0.939 | 55.819M |
-| 26 | FARTCOINUSDT | 0.371 | 55.398M |
-| 27 | LTCUSDT | 83.410 | 54.571M |
-| 28 | ALLOUSDT | 0.164 | 50.550M |
+| 排名 | 合约 | 24h 成交额 | 4h 波动幅度 |
+|------|------|------------|-------------|
+| 1 | ETHUSDT | 10.269B | 0.49% |
+| 2 | BTCUSDT | 6.643B | 0.29% |
+| 3 | SOLUSDT | 1.302B | 0.60% |
+| 4 | ZECUSDT | 672.393M | 2.96% |
+| 5 | DOGEUSDT | 439.507M | 0.45% |
+| 6 | LUNAUSDT | 321.275M | 10.85% |
+| 7 | XRPUSDT | 257.902M | 0.46% |
+| 8 | PEPEUSDT | 192.350M | 0.98% |
+| 9 | BEATUSDT | 187.526M | 4.81% |
+| 10 | HYPEUSDT | 148.545M | 1.95% |
+| 11 | SUIUSDT | 138.388M | 1.13% |
+| 12 | STABLEUSDT | 136.613M | 10.92% |
+| 13 | PIPPINUSDT | 121.083M | 6.58% |
+| 14 | PIEVERSEUSDT | 96.479M | 4.07% |
+| 15 | LINKUSDT | 83.070M | 0.45% |
+| 16 | BCHUSDT | 82.598M | 0.37% |
+| 17 | XPLUSDT | 78.276M | 0.75% |
+| 18 | ADAUSDT | 78.209M | 0.73% |
+| 19 | LABUSDT | 77.044M | 4.87% |
+| 20 | BNBUSDT | 75.009M | 0.35% |
+| 21 | PUMPUSDT | 73.935M | 0.80% |
+| 22 | MOODENGUSDT | 67.191M | 1.42% |
+| 23 | WLDUSDT | 61.349M | 1.05% |
+| 24 | AAVEUSDT | 57.933M | 0.76% |
+| 25 | FARTCOINUSDT | 57.790M | 4.09% |
+| 26 | ASTERUSDT | 55.368M | 1.64% |
+| 27 | LTCUSDT | 54.604M | 0.58% |
+| 28 | ALLOUSDT | 52.458M | 5.03% |
