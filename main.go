@@ -18,22 +18,32 @@ type Ticker struct {
 	VolCcy24h string `json:"volCcy24h"`
 }
 
-// APIResponse 表示 API 返回的数据结构
+// APIResponse 表示 /market/tickers 返回的数据
 type APIResponse struct {
 	Data []Ticker `json:"data"`
 }
 
-// TickerRow 用于存储筛选后的数据，方便后续排序和展示
-type TickerRow struct {
-	InstID      string
-	LastPrice   float64
-	DailyVolume float64
+// CandleAPIResponse 表示 /market/candles 返回的数据
+// OKX 的 data 是一个二维数组，每一项是 [ts, o, h, l, c, ...]
+type CandleAPIResponse struct {
+	Data [][]string `json:"data"`
 }
 
-const OKXAPIURL = "https://www.okx.com/api/v5/market/tickers?instType=SWAP"
+// TickerRow 用于存储筛选后的数据
+type TickerRow struct {
+	InstID         string  // 例如 BTCUSDT（展示用）
+	RawInstID      string  // 例如 BTC-USDT-SWAP（请求 K 线用）
+	DailyVolume    float64 // 24h 成交额（USDT）
+	Volatility4hPc float64 // 最近 4 小时波动幅度百分比
+}
 
-// transformInstID 将 Instrument ID 转换为期望格式：
-// 如 "BTC-USDT-SWAP" 转换为 "BTCUSDT"（保留前两部分，并去掉 "-" 连接符）
+const (
+	OKXTickersURL = "https://www.okx.com/api/v5/market/tickers?instType=SWAP"
+	OKXCandlesURL = "https://www.okx.com/api/v5/market/candles"
+)
+
+// transformInstID 将 Instrument ID 转换为展示格式：
+// 如 "BTC-USDT-SWAP" 转换为 "BTCUSDT"
 func transformInstID(instID string) string {
 	parts := strings.Split(instID, "-")
 	if len(parts) >= 2 {
@@ -43,9 +53,7 @@ func transformInstID(instID string) string {
 }
 
 // formatVolume 根据数值大小返回带单位的字符串表示形式。
-// 如果数值大于等于 1e9（十亿），则转换为 B 单位；
-// 如果大于等于 1e6（百万），则转换为 M 单位；
-// 否则直接返回原始数值，均保留 3 位小数。
+// >= 1e9 -> B，>= 1e6 -> M，否则原数值，均保留 3 位小数。
 func formatVolume(volume float64) string {
 	if volume >= 1e9 {
 		return fmt.Sprintf("%.3fB", volume/1e9)
@@ -55,9 +63,61 @@ func formatVolume(volume float64) string {
 	return fmt.Sprintf("%.3f", volume)
 }
 
+// fetch4hVolatility 从 OKX 拉取最近一根 4 小时 K 线，并计算波动幅度百分比：
+// (high - low) / open * 100
+func fetch4hVolatility(rawInstID string) (float64, error) {
+	url := fmt.Sprintf("%s?instId=%s&bar=4H&limit=1", OKXCandlesURL, rawInstID)
+
+	resp, err := http.Get(url)
+	if err != nil {
+		return 0, fmt.Errorf("error fetching 4H candles for %s: %w", rawInstID, err)
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return 0, fmt.Errorf("error reading 4H candles body for %s: %w", rawInstID, err)
+	}
+
+	var candleResp CandleAPIResponse
+	if err := json.Unmarshal(body, &candleResp); err != nil {
+		return 0, fmt.Errorf("error parsing 4H candles JSON for %s: %w", rawInstID, err)
+	}
+
+	if len(candleResp.Data) == 0 {
+		return 0, fmt.Errorf("no 4H candle data for %s", rawInstID)
+	}
+
+	// data[0] = [ts, o, h, l, c, ...]
+	candle := candleResp.Data[0]
+	if len(candle) < 4 {
+		return 0, fmt.Errorf("invalid 4H candle data for %s", rawInstID)
+	}
+
+	open, err := strconv.ParseFloat(candle[1], 64)
+	if err != nil {
+		return 0, fmt.Errorf("error parsing open for %s: %w", rawInstID, err)
+	}
+	high, err := strconv.ParseFloat(candle[2], 64)
+	if err != nil {
+		return 0, fmt.Errorf("error parsing high for %s: %w", rawInstID, err)
+	}
+	low, err := strconv.ParseFloat(candle[3], 64)
+	if err != nil {
+		return 0, fmt.Errorf("error parsing low for %s: %w", rawInstID, err)
+	}
+
+	if open <= 0 {
+		return 0, fmt.Errorf("open price <= 0 for %s", rawInstID)
+	}
+
+	volatility := (high - low) / open * 100
+	return volatility, nil
+}
+
 func main() {
-	// 从 OKX API 获取数据
-	response, err := http.Get(OKXAPIURL)
+	// 1. 从 OKX API 获取 SWAP tickers
+	response, err := http.Get(OKXTickersURL)
 	if err != nil {
 		fmt.Printf("Error fetching data: %v\n", err)
 		os.Exit(1)
@@ -70,7 +130,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	// 解析 JSON 数据
+	// 2. 解析 JSON 数据
 	var apiResponse APIResponse
 	err = json.Unmarshal(body, &apiResponse)
 	if err != nil {
@@ -78,16 +138,13 @@ func main() {
 		os.Exit(1)
 	}
 
-	// 筛选 USDT 交易对，并计算 24h 交易额（单位 USDT）
-	// 只保留日交易额大于等于 3000 万 USDT 的数据
+	// 3. 筛选 USDT 交易对，计算 24h 成交额（单位 USDT），只保留 >= 5000 万 USDT
 	var rows []TickerRow
 	for _, ticker := range apiResponse.Data {
-		// 只处理 Instrument ID 中包含 "USDT" 的交易对
 		if !strings.Contains(ticker.InstID, "USDT") {
 			continue
 		}
 
-		// 将字符串转换为浮点数
 		last, err := strconv.ParseFloat(ticker.Last, 64)
 		if err != nil {
 			continue
@@ -98,34 +155,53 @@ func main() {
 		}
 		dailyVolume := last * volCcy24h
 
-		// 只保留日交易额大于等于 5000 万 USDT 的数据
 		if dailyVolume >= 50000000 {
 			transformedID := transformInstID(ticker.InstID)
 			rows = append(rows, TickerRow{
 				InstID:      transformedID,
-				LastPrice:   last,
+				RawInstID:   ticker.InstID,
 				DailyVolume: dailyVolume,
 			})
 		}
 	}
 
-	// 按照 24h 交易额从大到小排序
+	// 4. 对入选标的，逐个拉取最近 4 小时波动幅度百分比
+	for i := range rows {
+		v, err := fetch4hVolatility(rows[i].RawInstID)
+		if err != nil {
+			// 出错时保留 0，打印日志但不中断整个程序
+			fmt.Printf("Warning: %v\n", err)
+			rows[i].Volatility4hPc = 0
+			continue
+		}
+		rows[i].Volatility4hPc = v
+	}
+
+	// 5. 按 24h 成交额从大到小排序
 	sort.Slice(rows, func(i, j int) bool {
 		return rows[i].DailyVolume > rows[j].DailyVolume
 	})
 
-	// 生成 Markdown 格式的表格文档
-	output := "# USDT Perpetual Contracts with Daily Volume > $50 Million\n\n"
-	output += "| Rank | Instrument ID | Last Price (USDT) | 24h Volume (USDT) |\n"
-	output += "|------|---------------|-------------------|-------------------|\n"
+	// 6. 生成 Markdown 文件
+	// 标题：中文、简洁
+	output := "# USDT 永续合约成交额排行\n\n"
+
+	// 使用你现在的简洁表头，并新增一列 4 小时波动幅度
+	output += "| 排名 | 合约 | 24h 成交额 | 4h 波动幅度 |\n"
+	output += "|------|------|------------|-------------|\n"
+
 	for i, row := range rows {
-		// 24h Volume 按照要求保留 3 位小数并带单位
 		volumeStr := formatVolume(row.DailyVolume)
-		// 此处 Last Price 同样保留 3 位小数，如需保留 2 位可将 %.3f 改为 %.2f
-		output += fmt.Sprintf("| %d | %s | %.3f | %s |\n", i+1, row.InstID, row.LastPrice, volumeStr)
+		output += fmt.Sprintf(
+			"| %d | %s | %s | %.2f%% |\n",
+			i+1,
+			row.InstID,
+			volumeStr,
+			row.Volatility4hPc,
+		)
 	}
 
-	// 写入 README.md 文件
+	// 7. 写入 README.md
 	if err := ioutil.WriteFile("README.md", []byte(output), 0644); err != nil {
 		fmt.Printf("Error writing to README.md: %v\n", err)
 		os.Exit(1)
