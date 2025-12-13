@@ -2,25 +2,25 @@
 
 | 排名 | 合约 | 24h 成交额 | 4h 波动幅度 |
 |------|------|------------|-------------|
-| 1 | ETHUSDT | 3.968B | 0.16% |
-| 2 | BTCUSDT | 2.213B | 0.11% |
-| 3 | SOLUSDT | 550.626M | 0.20% |
-| 4 | BEATUSDT | 460.071M | 2.85% |
-| 5 | ZECUSDT | 375.498M | 0.86% |
-| 6 | DOGEUSDT | 183.695M | 0.18% |
-| 7 | XRPUSDT | 170.007M | 0.11% |
-| 8 | JELLYJELLYUSDT | 155.376M | 1.83% |
-| 9 | PROMPTUSDT | 152.866M | 2.08% |
-| 10 | LUNAUSDT | 148.523M | 1.05% |
-| 11 | TRUTHUSDT | 135.241M | 1.89% |
-| 12 | NIGHTUSDT | 120.240M | 1.84% |
-| 13 | PIPPINUSDT | 99.353M | 1.19% |
-| 14 | LRCUSDT | 88.349M | 4.87% |
-| 15 | PIEVERSEUSDT | 83.711M | 4.20% |
-| 16 | HYPEUSDT | 80.531M | 0.41% |
-| 17 | XPLUSDT | 77.249M | 0.51% |
-| 18 | WETUSDT | 72.644M | 1.96% |
-| 19 | PEPEUSDT | 66.948M | 0.25% |
-| 20 | BNBUSDT | 60.560M | 0.21% |
-| 21 | MERLUSDT | 54.766M | 0.68% |
-| 22 | SUIUSDT | 53.663M | 0.32% |
+| 1 | ETHUSDT | 3.973B | 1.35% |
+| 2 | BTCUSDT | 2.092B | 0.55% |
+| 3 | SOLUSDT | 514.503M | 1.14% |
+| 4 | BEATUSDT | 438.173M | 7.08% |
+| 5 | ZECUSDT | 372.503M | 2.01% |
+| 6 | DOGEUSDT | 185.892M | 0.94% |
+| 7 | XRPUSDT | 168.494M | 0.75% |
+| 8 | PROMPTUSDT | 157.329M | 3.77% |
+| 9 | JELLYJELLYUSDT | 148.609M | 4.55% |
+| 10 | LUNAUSDT | 145.186M | 2.68% |
+| 11 | TRUTHUSDT | 135.830M | 5.21% |
+| 12 | PIPPINUSDT | 114.481M | 11.50% |
+| 13 | NIGHTUSDT | 110.886M | 2.04% |
+| 14 | PIEVERSEUSDT | 79.772M | 4.20% |
+| 15 | HYPEUSDT | 76.962M | 2.03% |
+| 16 | XPLUSDT | 76.028M | 1.67% |
+| 17 | WETUSDT | 70.874M | 2.99% |
+| 18 | PEPEUSDT | 65.563M | 1.07% |
+| 19 | LRCUSDT | 64.988M | 8.76% |
+| 20 | BNBUSDT | 60.819M | 0.75% |
+| 21 | MERLUSDT | 55.174M | 2.63% |
+| 22 | SUIUSDT | 53.217M | 1.71% |
